@@ -1,8 +1,31 @@
 name: Update Python version
 on:
   workflow_dispatch:
+    inputs:
+      repository:
+        description: "Source repository (owner/repo)"
+        required: true
+      pr_number:
+        description: "Pull request number"
+        required: true
+      callback_url:
+        description: "URL to call to complete the check run"
+        required: true
 jobs:
   migration:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ github.event.inputs.repository }}
+
+      - name: claude -p "Update python version" --allowedTools "Read,Edit,Bash"
+        run: sleep 3s
+
+      - name: Complete check run
+        if: always()
+        run: |
+          conclusion=${{ job.status == 'success' && 'success' || 'failure' }}
+          curl -s -X POST "${{ github.event.inputs.callback_url }}" \
+            -H "Content-Type: application/json" \
+            -d "{\"conclusion\": \"${conclusion}\"}"
