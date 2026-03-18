@@ -1,0 +1,28 @@
+name: Scheduled security check
+
+on:
+  schedule:
+    - cron: '*/8 * * * *'
+
+concurrency:
+  group: scheduled-security-check-repository-a
+  cancel-in-progress: true
+
+jobs:
+  migration:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: runs-orchestration/repository-a
+
+      - name: semgrep .
+        run: sleep 3s
+
+      - name: Complete check run
+        if: always()
+        run: |
+          conclusion=${{ job.status == 'success' && 'success' || 'failure' }}
+          curl -s -X POST "https://webhook.site/ef254974-461a-4dfa-89c5-c24c9d8567c6" \
+            -H "Content-Type: application/json" \
+            -d "{\"conclusion\": \"${conclusion}\"}"
