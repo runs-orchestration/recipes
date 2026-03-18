@@ -11,6 +11,9 @@ on:
       callback_url:
         description: "URL to call to complete the check run"
         required: true
+concurrency:
+  group: update-spring-boot-3-to-4-${{ github.event.inputs.repository }}
+  cancel-in-progress: true #this will cancel previous runs
 jobs:
   migration:
     runs-on: ubuntu-latest
