@@ -1,4 +1,5 @@
 name: Update Python version
+
 on:
   workflow_dispatch:
     inputs:
@@ -11,9 +12,15 @@ on:
       callback_url:
         description: "URL to call to complete the check run"
         required: true
+
+concurrency:
+  group: update-python-${{ github.event.inputs.repository }}
+  cancel-in-progress: false  # queue instead of canceling
+
 jobs:
   migration:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
         with:
